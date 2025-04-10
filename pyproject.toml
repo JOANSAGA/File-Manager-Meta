@@ -1,0 +1,21 @@
+[project]
+name = "file-manager-meta"
+version = "0.1.0"
+description = "File-Manager-Meta is a tool that organizes and classifies files by their metadata, such as extension and creation date, and also generates detailed reports on the analyzed files."
+authors = [{ name = "JOANSAGA", email = "joansaga@outlook.com" }]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "typer (>=0.15.2,<0.16.0)",
+    "rich (>=13.9.4,<14.0.0)"
+]
+
+[tool.poetry]
+packages = [{ include = "file_manager_meta", from = "src" }]
+
+[tool.poetry.scripts]
+file-manager-meta = "file_manager_meta.cli:app"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
