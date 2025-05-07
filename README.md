@@ -1,43 +1,87 @@
-En el archivo `README.md`, podrías agregar las siguientes secciones para hacerlo más completo y profesional:
+# File Manager Meta
 
-1. **Tabla de Contenidos**  
-   Facilita la navegación en el archivo, especialmente si es extenso.
+## Tabla de Contenidos
 
-   ```markdown
-   ## Tabla de Contenidos
-   - [Características](#características)
-   - [Instalación](#instalación)
-   - [Uso](#uso)
-   - [Ejemplo](#ejemplo)
-   - [Requisitos](#requisitos)
-   - [Contribuciones](#contribuciones)
-   - [Licencia](#licencia)
+- [Instalación para Desarrollo](#instalación-para-desarrollo)
+- [Características](#características)
+- [Estructura del Proyecto](#estructura-del-proyecto)
+- [Pruebas](#pruebas)
+- [Notas Adicionales, Bugs](#notas-adicionales-bugs)
+- [Contribuidores](#contribuidores)
+- [Referencias](#referencias)
+- [Licencia](#licencia)
+
+---
+
+## Instalación para Desarrollo:
+
+Sigue estos pasos para instalar y configurar el proyecto en tu entorno local:
+
+1. **Clona el repositorio**:
+   ```bash
+   git clone https://github.com/JOANSAGA/File-Manager-Meta
+   cd File-Manager-Meta
    ```
-
-2. **Estado del Proyecto**  
-   Este proyecto está en desarrollo activo. Se aceptan contribuciones y sugerencias.
-
-   ```markdown
-   Funcionalidades listas
-   - Desarrollar Reparar archivos sin extensión
-   - Desarrollar sort by ext
-   - Desarrollar sort by date
-   
-   Funcionalidades Futuras
-    - Desarrollar sort by size
-    - Desarrollar Report: 
-        - Generar documento HTML
-        - Ubicación de los archivos
-        - Hashes
-        - Exif
+2. **Instala Poetry (si no lo tienes instalado):**
+   ```bash
+   pip install poetry
+   ```
+3. **Instala las dependencias del proyecto:**
+   ```bash
+    poetry install
+    ```
+4. **Ejecuta la aplicación**
+    ```bash
+    file-manager-meta
     ```
 
-3. **Estructura del Proyecto**  
-   Explica brevemente la estructura de carpetas y archivos principales.
+---
 
-   ```markdown
-   ## Estructura del Proyecto
-   ```
+## Requisitos Externos
+
+Este proyecto requiere la instalación de una herramienta externa llamada `Exiftool` para manejar metadatos de archivos.
+Asegúrate de instalarla antes de usar las funcionalidades relacionadas.
+
+Instucciones de instalación desde la web oficial de [ExifTool](https://exiftool.org/)
+
+### Instalación usando gestores de paquetes:
+
+- **Windows**:
+  ```bash
+  winget install exiftool
+  ```
+
+- **Linux**:
+  ```bash
+  apt install exiftool
+  ```
+
+- **MacOS**:
+  ```bash
+  brew install exiftool
+  ```
+
+---
+
+## Características
+
+- Funcionalidades listas:
+    - Reparar archivos sin extensión.
+    - Ordenar por extensión.
+    - Ordenar por fecha.
+
+
+- Funcionalidades futuras:
+    - Ordenar por tamaño.
+    - Generar reportes en HTML con:
+        - Ubicación de los archivos.
+        - Hashes.
+        - Metadatos Exif.
+
+---
+
+## Estructura del Proyecto
+
    ```plaintext
    src/
    ├── file_manager_meta/
@@ -48,44 +92,39 @@ En el archivo `README.md`, podrías agregar las siguientes secciones para hacerl
    README.md               # Documentación del proyecto
    ```
 
-4. **Pruebas**  
-   Pruebas unitarias en proceso.
+---
+
+## Pruebas
+
+Pruebas unitarias en proceso.
 
    ```markdown
    
    ```
 
-5. **Contribuidores**  
-   Lista de personas que han contribuido al proyecto.
+---
 
-   ```markdown
-   ## Contribuidores
-   - [Nombre del Contribuidor](https://github.com/usuario)
-   ```
+## Bugs
 
-6. **Notas Adicionales o Limitaciones**  
-   Menciona cualquier limitación conocida o aspectos importantes del proyecto.
+- Error con archivos que tengan tilde
+- Restar archivos sin extensión del conteo final de archivos ordenados
+- Corregir el conteo de archivos reparados sin extensión
+- Modificar Funcionalidad "REPARAR" para que acepte arrary de direcciones o archivos
+- Ignorar Carpeta System volumen information
+- La herramienta puede dar error con archivos ocultos.
 
-   ```markdown
-   ## Notas Adicionales
-   - Actualmente, la herramienta no soporta archivos ocultos.
-   - Se requiere `exiftool` instalado para la funcionalidad de reparación.
-   
-   ## Bugs
-   - Error con archivos que tengan tilde
-   - Restar archivos sin extensión del conteo final de archivos ordenados
-   - Corregir el conteo de archivos reparados sin extensión
-   - Modificar Funcionalidad "REPARAR" para que acepte arrary de direcciones o archivos
-   - Ignorar Carpeta System volumen information 
-   ```
+---
 
-7. **Referencias**  
-   Incluye enlaces a documentación o recursos externos relevantes.
+## Contribuidores
 
-   ```markdown
-   ## Referencias
-   - [Typer Documentation](https://typer.tiangolo.com/)
-   - [Rich Documentation](https://rich.readthedocs.io/)
-   ```
+Lista de personas que han contribuido al proyecto.
 
-Estas secciones harán que tu `README.md` sea más informativo y útil para los usuarios y colaboradores.
+- [JOANSAGA](https://github.com/JOANSAGA)
+
+---
+
+## Referencias
+
+- [ExifTool](https://exiftool.org/)
+- [Rich](https://rich.readthedocs.io/en/stable/)
+- [Typer](https://typer.tiangolo.com/)
