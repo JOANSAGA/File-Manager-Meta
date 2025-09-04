@@ -55,10 +55,10 @@ Este proyecto requiere **ExifTool** para la funcionalidad de `repair`. Asegúrat
 
 ## Características
 
-- **Clasificación de Ficheros**: Organiza ficheros en subdirectorios basándose en su extensión o fecha de creación.
-- **Informes Detallados**: Genera informes en la consola o en formato HTML con los hashes de integridad (MD5, SHA-1, SHA-256) de todos los ficheros, agrupados por subcarpetas.
-- **Detección y Eliminación de Duplicados**: Localiza ficheros con contenido idéntico en todas las subcarpetas y ofrece la opción de eliminarlos de forma segura, conservando uno de ellos según una regla (ej. el más antiguo).
-- **Reparación de Extensiones**: Analiza ficheros sin extensión y les asigna la correcta basándose en sus metadatos (requiere ExifTool).
+- **Clasificación de Ficheros**: Organiza ficheros en subdirectorios basándose en su extensión, fecha de creación (con granularidad por año, mes o día) o tamaño.
+- **Informes Detallados**: Genera informes en la consola o en formato HTML con los hashes de integridad (MD5, SHA-1, SHA-256) de todos los ficheros, agrupados por subcarpetas, e identifica conjuntos de ficheros duplicados.
+- **Detección y Eliminación de Duplicados**: Localiza ficheros con contenido idéntico en todas las subcarpetas y ofrece la opción de eliminarlos de forma segura, conservando uno de ellos según una regla (ej. el más antiguo), con un modo de simulación (`--dry-run`) para prevenir la pérdida de datos.
+- **Reparación de Extensiones**: Analiza ficheros sin extensión y les asigna la correcta basándose en sus metadatos (requiere ExifTool). Ahora soporta procesamiento por lotes y cacheo de resultados para mayor eficiencia.
 
 ---
 
@@ -74,7 +74,15 @@ Organiza los ficheros de un directorio en subcarpetas.
 file-manager-meta sort <directorio> --sort-by <criterio>
 ```
 
-- **Criterios de ordenación (`--sort-by`)**: `ext` (extensión), `date` (fecha).
+- **Criterios de ordenación (`--sort-by`)**:
+    *   `ext`: Por extensión.
+    *   `date`: Por fecha de creación. Puede usarse con `--date-granularity`.
+    *   `size`: Por tamaño.
+
+- **Granularidad de fecha (`--date-granularity`)**: Solo válido con `--sort-by date`.
+    *   `year`: Organiza por año (ej. `2023/`).
+    *   `month`: Organiza por año y mes (ej. `2023/01/`).
+    *   `day`: Organiza por año, mes y día (ej. `2023/01/15/`). (Por defecto si no se especifica granularidad).
 
 ### Generar Informes (`report`)
 
@@ -91,11 +99,13 @@ file-manager-meta report <directorio>
 
 ### Reparar Extensiones (`repair`)
 
-Busca ficheros sin extensión en un directorio y se la asigna usando sus metadatos.
+Busca ficheros sin extensión en uno o varios directorios/ficheros y se la asigna usando sus metadatos. Soporta múltiples rutas.
 
 ```bash
-file-manager-meta repair <directorio>
+file-manager-meta repair <ruta1> [ruta2 ...]
 ```
+
+- **Ejemplo**: `file-manager-meta repair /ruta/a/directorio1 /ruta/a/fichero.bin`
 
 ### Eliminar Duplicados (`deduplicate`)
 
@@ -132,12 +142,13 @@ src/
 └── file_manager_meta/
     ├── __init__.py
     ├── cli.py          # Comandos principales de la CLI
+    ├── cache_manager.py # Gestión de la caché de hashes y metadatos
     ├── deduplicate.py  # Lógica para eliminar duplicados
     ├── enums.py        # Enumeraciones para criterios de la CLI
-    ├── hashes.py       # Lógica para calcular hashes
-    ├── repair.py       # Lógica para reparar extensiones de archivo
-    ├── report.py       # Lógica para generar informes
-    └── sort.py         # Lógica para clasificar archivos
+    ├── hashes.py       # Lógica para calcular hashes (con cacheo)
+    ├── repair.py       # Lógica para reparar extensiones (con batching y cacheo)
+    ├── report.py       # Lógica para generar informes (con cacheo y paralelismo)
+    └── sort.py         # Lógica para clasificar archivos (con manejo de errores)
 tests/
 └── __init__.py
 ```
@@ -146,9 +157,7 @@ tests/
 
 ## Bugs Conocidos
 
-- El manejo de ficheros con tildes o caracteres especiales en el nombre puede ser inconsistente.
-- El conteo de ficheros en los resúmenes puede no ser siempre exacto.
-- Errores de permisos con ficheros ocultos o del sistema (ej. `System Volume Information`).
+- **Error con archivos que tengan tilde**: Puede ocurrir con algunos nombres de archivo que contienen caracteres especiales, especialmente en `repair`. La herramienta ahora proporciona mensajes de error más claros, pero la solución definitiva podría depender de la configuración del sistema o de actualizaciones de `ExifTool`/`pyexiftool`.
 
 ---
 

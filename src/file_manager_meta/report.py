@@ -20,13 +20,29 @@ def generate_report(directory: Path, output: Path = None):
     conn, db_path = init_cache(directory)
     console.print(f"Using cache database: [dim]{db_path}[/dim]")
 
+    files_by_directory = defaultdict(list)
+
     try:
         # 1. Collect and group files by directory
-        files_by_directory = defaultdict(list)
-        for dir_path, _, file_names in os.walk(directory):
+        all_file_paths = []
+        for dir_path, dir_names, file_names in os.walk(directory):
+            # Modify dir_names in-place to skip system/hidden directories
+            dir_names[:] = [d for d in dir_names if d not in ['System Volume Information', '$RECYCLE.BIN']]
+            dir_names[:] = [d for d in dir_names if not d.startswith('.')] # Skip hidden directories
+
             if file_names:
                 for file_name in file_names:
-                    files_by_directory[Path(dir_path)].append(file_name)
+                    file_path = Path(dir_path) / file_name
+                    # Skip hidden files
+                    if file_path.name.startswith('.'):
+                        continue
+
+                    try:
+                        if file_path.is_file() and not file_path.is_symlink():
+                            all_file_paths.append(file_path)
+                            files_by_directory[Path(dir_path)].append(file_name)
+                    except OSError:
+                        continue
 
         hash_map = defaultdict(list)
 
@@ -88,3 +104,13 @@ def generate_report(directory: Path, output: Path = None):
     finally:
         conn.close()
         console.print("[dim]Cache connection closed.[/dim]")
+        
+        # Add summary
+        total_files_processed = len(all_file_paths) # From Step 2
+        total_duplicate_sets = len([files for files in hash_map.values() if len(files) > 1]) # From Step 3
+
+        console.rule("Report Task Summary")
+        console.print(f"[green]Total files scanned:[/green] {total_files_processed}")
+        console.print(f"[green]Duplicate sets found:[/green] {total_duplicate_sets}")
+        if output:
+            console.print(f"[green]Report saved to:[/green] {output}")
