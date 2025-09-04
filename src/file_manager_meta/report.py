@@ -17,7 +17,8 @@ def generate_report(directory: Path, output: Path = None):
         raise typer.Exit(code=1)
 
     report_console = Console(record=True) if output else console
-    conn = init_cache(directory)
+    conn, db_path = init_cache(directory)
+    console.print(f"Using cache database: [dim]{db_path}[/dim]")
 
     try:
         # 1. Collect and group files by directory

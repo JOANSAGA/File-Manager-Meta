@@ -22,7 +22,8 @@ def deduplicate_files(directory: Path, dry_run: bool, keep_rule: str):
     console = Console()
     console.print(f"Starting duplicate scan in [cyan]{directory}[/cyan]...")
 
-    conn = init_cache(directory)
+    conn, db_path = init_cache(directory)
+    console.print(f"Using cache database: [dim]{db_path}[/dim]")
     try:
         # --- Step 1: Group files by size to pre-filter ---
         console.print("Step 1: Finding potential duplicates by size...")

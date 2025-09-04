@@ -1,11 +1,32 @@
 import sqlite3
+import os
+import hashlib
 from pathlib import Path
+import platform # To detect OS for platform-specific cache dir
 
-DB_NAME = ".file_manager_cache.db"
+# Function to get platform-specific cache directory
+def _get_cache_dir() -> Path:
+    if platform.system() == "Windows":
+        # LOCALAPPDATA is preferred for non-roaming data
+        return Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local")) / "file-manager-meta" / "cache"
+    elif platform.system() == "Darwin": # macOS
+        return Path.home() / "Library" / "Caches" / "file-manager-meta"
+    else: # Linux and other Unix-like systems
+        return Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache")) / "file-manager-meta"
 
-def init_cache(directory: Path):
-    """Initializes the database and returns a connection object."""
-    db_path = directory / DB_NAME
+# Function to generate unique DB path for a given directory
+def _get_cache_db_path(directory: Path) -> Path:
+    cache_dir = _get_cache_dir()
+    cache_dir.mkdir(parents=True, exist_ok=True) # Ensure cache directory exists
+
+    # Use a hash of the absolute path of the analyzed directory for uniqueness
+    dir_hash = hashlib.md5(str(directory.absolute()).encode('utf-8')).hexdigest()
+    db_name = f"cache_{dir_hash}.db"
+    return cache_dir / db_name
+
+def init_cache(directory: Path) -> tuple[sqlite3.Connection, Path]:
+    """Initializes the database for a given directory and returns a connection object and its path."""
+    db_path = _get_cache_db_path(directory)
     conn = sqlite3.connect(db_path)
     # Create table if it doesn't exist
     conn.execute("""
@@ -19,9 +40,9 @@ def init_cache(directory: Path):
         );
     """)
     conn.commit()
-    return conn
+    return conn, db_path
 
-def get_cached_hashes(conn: sqlite3.Connection, file_path: Path, stat_info):
+def get_cached_hashes(conn: sqlite3.Connection, file_path: Path, stat_info) -> dict | None:
     """Retrieves cached hashes if the file is unchanged."""
     cursor = conn.cursor()
     cursor.execute(
