@@ -50,7 +50,10 @@ def init_cache(directory: Path) -> tuple[sqlite3.Connection, Path]:
             md5 TEXT,
             sha1 TEXT,
             sha256 TEXT,
-            exiftool_file_type TEXT
+            exiftool_file_type TEXT,
+            create_date TEXT,
+            date_time_original TEXT,
+            file_modify_date TEXT
         );
     """)
     conn.commit()
@@ -61,19 +64,22 @@ def get_cached_hashes(conn: sqlite3.Connection, file_path: Path, stat_info) -> d
     """Retrieves cached hashes if the file is unchanged."""
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT mtime, size, md5, sha1, sha256, exiftool_file_type FROM file_hashes WHERE path = ?",
+        "SELECT mtime, size, md5, sha1, sha256, exiftool_file_type, create_date, date_time_original, file_modify_date FROM file_hashes WHERE path = ?",
         (str(file_path),)
     )
     row = cursor.fetchone()
     if row:
-        mtime, size, md5, sha1, sha256, exiftool_file_type = row
+        mtime, size, md5, sha1, sha256, exiftool_file_type, create_date, date_time_original, file_modify_date = row
         # Check if file metadata matches the cached metadata
         if mtime == stat_info.st_mtime and size == stat_info.st_size:
             return {
                 "md5": md5,
                 "sha1": sha1,
                 "sha256": sha256,
-                "exiftool_file_type": exiftool_file_type  # Include new column
+                "exiftool_file_type": exiftool_file_type,
+                "create_date": create_date,
+                "date_time_original": date_time_original,
+                "file_modify_date": file_modify_date
             }
     return None
 
@@ -81,8 +87,8 @@ def get_cached_hashes(conn: sqlite3.Connection, file_path: Path, stat_info) -> d
 def set_cached_hashes(conn: sqlite3.Connection, file_path: Path, stat_info, hashes: dict):
     """Inserts or updates a file's hashes and ExifTool file type in the cache."""
     conn.execute(
-        """REPLACE INTO file_hashes (path, mtime, size, md5, sha1, sha256, exiftool_file_type)
-           VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        """REPLACE INTO file_hashes (path, mtime, size, md5, sha1, sha256, exiftool_file_type, create_date, date_time_original, file_modify_date)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (
             str(file_path),
             stat_info.st_mtime,
@@ -90,7 +96,10 @@ def set_cached_hashes(conn: sqlite3.Connection, file_path: Path, stat_info, hash
             hashes.get("md5"),
             hashes.get("sha1"),
             hashes.get("sha256"),
-            hashes.get("exiftool_file_type"),  # Include new column
+            hashes.get("exiftool_file_type"),
+            hashes.get("create_date"),
+            hashes.get("date_time_original"),
+            hashes.get("file_modify_date"),
         )
     )
     conn.commit()

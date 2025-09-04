@@ -11,6 +11,7 @@ from file_manager_meta.sort import organizer
 from file_manager_meta.repair import repair_extension
 from file_manager_meta.report import generate_report
 from file_manager_meta.deduplicate import deduplicate_files
+from file_manager_meta.metadata_updater import update_metadata_date # New import
 from file_manager_meta.cache_manager import view_cache_contents, clear_cache, get_cache_file_path, recreate_database, \
     clear_all_caches  # New import
 
@@ -22,7 +23,7 @@ console = Console()
 def sort(directory: Annotated[Path, typer.Argument(exists=True, dir_okay=True, help="Directory to sort")],
          new_directory: Annotated[Path, typer.Option(dir_okay=True, help="New directory for sorted files")] = None,
          sort_by: Annotated[SortBy, typer.Option(case_sensitive=False, prompt=True,
-                                                 help="Sorting criterion: 'ext', 'date', or 'size'")] = SortBy.EXT,
+                                                 help="Sorting criterion: 'ext', 'date', or 'size'")] = "ext",
          date_granularity: Annotated[Optional[DateGranularity], typer.Option(
              help="Granularity for date sorting: 'year', 'month', or 'day'. Only valid with --sort-by date."
          )] = None,
@@ -66,6 +67,18 @@ def deduplicate(
             abort=True,
         )
     deduplicate_files(directory, dry_run=dry_run, keep_rule=keep.value)
+
+
+@app.command("update-metadata-date")
+def update_metadata_date_command(
+    paths: Annotated[List[Path], typer.Argument(exists=True, help="Paths to files or directories to process.")],
+    dry_run: Annotated[bool, typer.Option(help="Perform a dry run without modifying files.")] = False,
+    tag: Annotated[Optional[str], typer.Option(help="Specific ExifTool tag to update (e.g., CreateDate, DateTimeOriginal).")] = None,
+    no_backup: Annotated[bool, typer.Option(help="Do not create _original backup files.")] = False,
+    force: Annotated[bool, typer.Option(help="Force update even if dates already match.")] = False,
+):
+    """Updates file metadata date to match the date found in the filename."""
+    update_metadata_date(paths, dry_run=dry_run, tag=tag, no_backup=no_backup, force=force)
 
 
 # Create a Typer app for cache commands
